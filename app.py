@@ -102,8 +102,37 @@ def preprocess_labels(df_data):
         df_data[df_data.keys()[1]] = '__label__' + df_data[df_data.keys()[1]]
     return df_data
 
+def fn_autodefine_columns(df):
+    x = df.iloc[:, :-1].values # independent variable matrix
+    y = df.iloc[:, 3].values # dependent variable matrix
+    return x, y
+
 def fn_clean_null(df):
     return df.dropna()
+
+def fn_clean_missing_data(x):
+    from sklearn.preprocessing.impute import SimpleImputer
+    imputer = SimpleImputer(missing_values='NaN', strategy='mean')
+    imputer = SimpleImputer.fit(x[:,1:3])
+    x[:,1:3] = SimpleImputer.transform(x[:,1:3])
+    return x
+
+def fn_encode_categorical_data(x, y):
+    from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+    labelencoder_x = LabelEncoder()
+    x[:,0] = labelencoder_x.fit_transform(X[:,0])
+
+    onehotenconder = OneHotEncoder(categorical_features=[0])
+    x = onehotenconder.fit_transform(x).toarray()
+
+    labelencoder_y = LabelEncoder()
+    y = labelencoder_y.fit_transform(y)
+    return x, labelencoder_x, y, labelencoder_y
+
+def fn_train_test_split(x, y):
+    from sklearn.model_selection import train_test_split
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = 0)
+    return x_train, x_test, y_train, y_test
 
 # Split Train Test data
 def set_train_test_split(df, col_x, col_y, filename):
@@ -125,6 +154,13 @@ def set_train_test_split(df, col_x, col_y, filename):
     from sklearn.model_selection import train_test_split
     x_train, x_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, random_state=0)
     return ({'x_train': x_train, 'x_test': x_test, 'y_train': y_train, 'y_test': y_test})
+
+def fn_standard_scaler(x):
+    from sklearn.preprocessing import StandardScaler
+    sc_x = StandardScaler()
+    x_train = sc_x.fit_transform(x_train)
+    x_test = sc_x.transform(x_test)
+    return x_train, x_test
 
 # LinearSVC
 from sklearn.svm import LinearSVC
