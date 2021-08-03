@@ -264,7 +264,7 @@ async def model_controller(
     }
 
 @app.post('/classify')
-async def model_controller(
+async def classify_controller(
     file: UploadFile = File(...),
     column: str = Form(...),
     model_name: str = Form(...)
